@@ -6,6 +6,6 @@
 <!DOCTYPE html>
 <html>
 
-<h1>Dashboard</h1>
+    <h1>Company</h1>
 </html>
 @endsection

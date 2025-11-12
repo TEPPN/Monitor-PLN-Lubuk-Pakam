@@ -3,6 +3,9 @@
 @section('title', 'Home')
 
 @section('content')
-  <h2>Kontrak</h2>
-  <p>This is your home page content.</p>
+<!DOCTYPE html>
+<html>
+
+  <h1>Contract</h1>
+</html>
 @endsection
