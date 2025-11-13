@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CompanyController extends Controller
 {
@@ -14,7 +16,8 @@ class CompanyController extends Controller
      */
     public function index()
     {
-        //
+        $companies = Company::with('user')->latest()->paginate(20);
+        return view('pages.company', compact('companies'));
     }
 
     /**
@@ -24,7 +27,7 @@ class CompanyController extends Controller
      */
     public function create()
     {
-        //
+        return view('pages.company-create');
     }
 
     /**
@@ -35,7 +38,16 @@ class CompanyController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'name' => ['required', 'string', 'max:255', Rule::unique('companies')],
+        ]);
+
+        Company::create([
+            'name' => $validatedData['name'],
+            'user_id' => Auth::id(),
+        ]);
+
+        return redirect()->route('company.index')->with('success', 'Company added successfully!');
     }
 
     /**
