@@ -141,4 +141,11 @@ class RecapController extends Controller
 
         return redirect()->route('recap.index')->with('success', 'Recap deleted successfully!');
     }
+
+    public function map()
+    {
+        // Fetch all recaps that have coordinates and their related contract
+        $recaps = Recap::with('contract')->whereNotNull('x_cord')->whereNotNull('y_cord')->get();
+        return view('pages.map', compact('recaps'));
+    }
 }

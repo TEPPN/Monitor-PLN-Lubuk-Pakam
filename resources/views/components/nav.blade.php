@@ -3,6 +3,9 @@
     <a href="{{ url('/') }}" class="nav-link text-dark">Beranda</a>
   </li>
   <li class="nav-item">
+    <a href="{{ route('map') }}" class="nav-link text-dark">Manajemen Peta</a>
+  </li>
+  <li class="nav-item">
     <a href="{{ route('company.index') }}" class="nav-link text-dark">Daftar PT</a>
   </li>
   <li class="nav-item">

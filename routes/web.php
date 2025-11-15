@@ -21,6 +21,8 @@ Route::middleware(['auth'])->group(function () {
         return view('pages.dashboard');
     })->name('dashboard');
 
+    Route::get('/map', [App\Http\Controllers\RecapController::class, 'map'])->name('map');
+
     Route::get('/recaps', [App\Http\Controllers\RecapController::class, 'index'])->name('recap.index');
     Route::get('/recaps/create', [App\Http\Controllers\RecapController::class, 'create'])->name('recap.create');
     Route::post('/recaps', [App\Http\Controllers\RecapController::class, 'store'])->name('recap.store');
