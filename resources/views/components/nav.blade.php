@@ -3,13 +3,13 @@
     <a href="{{ url('/') }}" class="nav-link text-dark">Beranda</a>
   </li>
   <li class="nav-item">
-    <a href="{{ url('/company') }}" class="nav-link text-dark">Daftar PT</a>
+    <a href="{{ route('company.index') }}" class="nav-link text-dark">Daftar PT</a>
   </li>
   <li class="nav-item">
-    <a href="{{ url('/contract') }}" class="nav-link text-dark">Daftar Kontrak</a>
+    <a href="{{ route('contract.index') }}" class="nav-link text-dark">Daftar Kontrak</a>
   </li>
   <li class="nav-item">
-    <a href="{{ url('/map') }}" class="nav-link text-dark">Rekap Permintaan Tiang</a>
+    <a href="{{ route('recap.index') }}" class="nav-link text-dark">Rekap Permintaan Tiang</a>
   </li>
   <li class="nav-item">
     <a href="{{ url('/log') }}" class="nav-link text-dark">Log</a>
