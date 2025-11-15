@@ -1,13 +1,13 @@
 @extends('components.appbar')
 
-@section('title', 'Home')
+@section('title', 'Peta Pekerjaan')
 
 @section('content')
 <!DOCTYPE html>
 <html>
 
 <head>
-    <title>Simulasi Pergerakan Bus USU</title>
+    <title>Peta Sebaran Pekerjaan</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         #map {
@@ -16,57 +16,71 @@
     </style>
 </head>
 
-<body>
+<body data-recaps="{{ json_encode($recaps) }}">
     <div id="map"></div>
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
-        // Koordinat awal (pusat peta di sekitar USU)
-        const usuCoords = [3.566854, 98.659142];
+        // Safely get recap data from the body's data attribute
+        const recapData = document.body.getAttribute('data-recaps');
+        const recaps = JSON.parse(recapData);
+
+        // Set initial map coordinates. Default to a central point if no recaps exist.
+        const initialCoords = recaps.length > 0 && recaps[0].x_cord && recaps[0].y_cord ? [recaps[0].x_cord, recaps[0].y_cord] : [3.59, 98.67];
 
         // Inisialisasi peta
-        const map = L.map('map').setView(usuCoords, 15);
+        const map = L.map('map').setView(initialCoords, 13);
 
         // Tambahkan layer peta dari OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // Tambahkan marker (pin) untuk bus
-        const busIcon = L.icon({
-            iconUrl: 'images/bus-icon.png', // Icon bus
-            iconSize: [20, 20], // Ukuran icon
+        // Define custom icons for different pole sizes
+        const greenIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
         });
 
-        const busMarker = L.marker(usuCoords, { icon: busIcon }).addTo(map)
-            .bindPopup('Tiang 9 meter').openPopup();
+        const purpleIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
 
-        // Simulasikan pergerakan bus
-        let step = 0;
-        const route = [
-            [3.566056, 98.653221],//stadion mini
-            
-        ];
+        const defaultIcon = new L.Icon({
+            iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
 
-        function moveBus() {
-            if (step < route.length - 1) {
-                step++;
-            } else {
-                step = 0; // Kembali ke titik awal
+        // Loop through each recap and add a marker to the map
+        recaps.forEach(recap => {
+            if (recap.x_cord && recap.y_cord) {
+                const coordinates = [recap.x_cord, recap.y_cord];
+                const popupContent = `<b>Pekerjaan:</b> ${recap.job}<br><b>Alamat:</b> ${recap.address}`;
+
+                let icon = defaultIcon;
+                if (recap.contract && recap.contract.pole_size === '9 meter') {
+                    icon = greenIcon;
+                } else if (recap.contract && recap.contract.pole_size === '12 meter') {
+                    icon = purpleIcon;
+                }
+
+                L.marker(coordinates, { icon: icon })
+                    .addTo(map)
+                    .bindPopup(popupContent);
             }
-
-            // Pindahkan marker ke koordinat baru
-            const newCoords = route[step];
-            busMarker.setLatLng(newCoords);
-
-            // Geser peta untuk mengikuti bus
-            map.panTo(newCoords);
-
-            // Ulangi setiap 2 detik
-            setTimeout(moveBus, 2000);
-        }
-
-        // Mulai simulasi pergerakan bus
-        moveBus();
+        });
     </script>
 </body>
 
