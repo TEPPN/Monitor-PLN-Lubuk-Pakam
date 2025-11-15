@@ -21,9 +21,12 @@ Route::middleware(['auth'])->group(function () {
         return view('pages.dashboard');
     })->name('dashboard');
 
-    Route::get('/map', function () {
-        return view('pages.map');
-    });
+    Route::get('/recaps', [App\Http\Controllers\RecapController::class, 'index'])->name('recap.index');
+    Route::get('/recaps/create', [App\Http\Controllers\RecapController::class, 'create'])->name('recap.create');
+    Route::post('/recaps', [App\Http\Controllers\RecapController::class, 'store'])->name('recap.store');
+    Route::get('/recaps/{recap}/edit', [App\Http\Controllers\RecapController::class, 'edit'])->name('recap.edit');
+    Route::put('/recaps/{recap}', [App\Http\Controllers\RecapController::class, 'update'])->name('recap.update');
+    Route::delete('/recaps/{recap}', [App\Http\Controllers\RecapController::class, 'destroy'])->name('recap.destroy');
     Route::get('/company', [App\Http\Controllers\CompanyController::class, 'index'])->name('company.index');
     Route::get('/company/create', [App\Http\Controllers\CompanyController::class, 'create'])->name('company.create');
     Route::post('/company', [App\Http\Controllers\CompanyController::class, 'store'])->name('company.store');

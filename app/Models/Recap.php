@@ -7,5 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Recap extends Model
 {
-    protected $fillable = ['job', 'address', 'x_cord', 'y_cord', 'contract', 'executor'];
+    use HasFactory;
+
+    protected $fillable = ['contract_id', 'job', 'address', 'request', 'planted', 'x_cord', 'y_cord', 'contract', 'executor', 'created_by'];
+
+    public function contract()
+    {
+        return $this->belongsTo(Contract::class);
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }
