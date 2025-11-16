@@ -36,9 +36,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/contract', [App\Http\Controllers\ContractController::class, 'index'])->name('contract.index');
     Route::get('/contract/create', [App\Http\Controllers\ContractController::class, 'create'])->name('contract.create');
     Route::post('/contract', [App\Http\Controllers\ContractController::class, 'store'])->name('contract.store');
-    Route::get('/log', function () {
-        return view('pages.log');
-    });
+    Route::get('/log', [App\Http\Controllers\LogController::class, 'index'])->name('log.index');
+    Route::get('/log/download', [App\Http\Controllers\LogController::class, 'download'])->name('log.download');
 });
 
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');

@@ -7,9 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Contract extends Model
 {
-    protected $fillable = ['name', 'company_id', 'year', 'pole_size', 'stock'];
+    protected $fillable = ['name', 'company_id', 'contract_date', 'pole_size', 'stock'];
 
     use HasFactory;
+
+    protected $casts = [
+        'contract_date' => 'date',
+    ];
 
     public function company()
     {

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\Log;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Contract;
 use Illuminate\Http\Request;
 
@@ -42,15 +44,20 @@ class ContractController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255|unique:contracts',
             'company_id' => 'required|exists:companies,id',
-            'year' => 'required|integer|min:1900',
+            'contract_date' => 'required|date',
             'pole_size' => 'required|in:9 meter,12 meter',
             'stock' => 'required|integer|min:0',
         ]);
 
-        Contract::create($validatedData);
+        $contract = Contract::create($validatedData);
+
+        Log::create([
+            'user_id' => Auth::id(),
+            'action_type' => 'create',
+            'action_detail' => "Created contract: {$contract->name} (ID: {$contract->id})"
+        ]);
 
         // You should create a contract index page to redirect to.
         return redirect()->route('contract.index')->with('success', 'Contract created successfully!');
     }
 }
-

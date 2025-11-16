@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Recap;
+use App\Models\Log;
 use App\Models\Contract;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -74,7 +75,13 @@ class RecapController extends Controller
 
         $validatedData['created_by'] = Auth::id();
 
-        Recap::create($validatedData);
+        $recap = Recap::create($validatedData);
+
+        Log::create([
+            'user_id' => Auth::id(),
+            'action_type' => 'create',
+            'action_detail' => "Created recap: {$recap->job} (ID: {$recap->id})"
+        ]);
 
         return redirect()->route('recap.index')->with('success', 'Recap created successfully!');
     }
@@ -126,6 +133,12 @@ class RecapController extends Controller
 
         $recap->update($validatedData);
 
+        Log::create([
+            'user_id' => Auth::id(),
+            'action_type' => 'update',
+            'action_detail' => "Updated recap: {$recap->job} (ID: {$recap->id})"
+        ]);
+
         return redirect()->route('recap.index')->with('success', 'Recap updated successfully!');
     }
 
@@ -137,7 +150,15 @@ class RecapController extends Controller
      */
     public function destroy(Recap $recap)
     {
+        $recapJob = $recap->job;
+        $recapId = $recap->id;
         $recap->delete();
+
+        Log::create([
+            'user_id' => Auth::id(),
+            'action_type' => 'delete',
+            'action_detail' => "Deleted recap: {$recapJob} (ID: {$recapId})"
+        ]);
 
         return redirect()->route('recap.index')->with('success', 'Recap deleted successfully!');
     }

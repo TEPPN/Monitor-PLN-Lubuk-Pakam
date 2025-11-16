@@ -10,8 +10,7 @@
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h1>Add New Contract</h1>
-            {{-- You should create a contract.index route and page --}}
-            <a href="{{ route('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+            <a href="{{ route('contract.index') }}" class="btn btn-secondary">Back to Contract List</a>
         </div>
 
         <div class="card">
@@ -38,9 +37,9 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="year" class="form-label">Year</label>
-                        <input type="number" class="form-control @error('year') is-invalid @enderror" id="year" name="year" value="{{ old('year', date('Y')) }}" required>
-                        @error('year')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        <label for="contract_date" class="form-label">Contract Date</label>
+                        <input type="date" class="form-control @error('contract_date') is-invalid @enderror" id="contract_date" name="contract_date" value="{{ old('contract_date') }}" required>
+                        @error('contract_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
 
                     <div class="mb-3">

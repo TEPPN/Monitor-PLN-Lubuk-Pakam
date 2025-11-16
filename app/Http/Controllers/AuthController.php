@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
@@ -34,6 +35,12 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
+            Log::create([
+                'user_id' => Auth::id(),
+                'action_type' => 'login',
+                'action_detail' => 'User logged in successfully.'
+            ]);
+
             return redirect()->intended('/');
         }
 
@@ -44,10 +51,15 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        Log::create([
+            'user_id' => Auth::id(),
+            'action_type' => 'logout',
+            'action_detail' => 'User logged out.'
+        ]);
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/login');
     }
 }
-
