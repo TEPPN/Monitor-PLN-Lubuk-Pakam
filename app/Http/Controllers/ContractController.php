@@ -42,7 +42,7 @@ class ContractController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255|unique:contracts',
             'company_id' => 'required|exists:companies,id',
-            'year' => 'required|integer|min:1900',
+            'contract_date' => 'required|date',
             'pole_size' => 'required|in:9 meter,12 meter',
             'stock' => 'required|integer|min:0',
         ]);
@@ -53,4 +53,3 @@ class ContractController extends Controller
         return redirect()->route('contract.index')->with('success', 'Contract created successfully!');
     }
 }
-
