@@ -13,6 +13,12 @@
     <button id="toggleSidebar" class="btn btn-light btn-sm me-3">☰</button>
     <img src="{{ asset('assets/icon/pln.svg') }}" alt="Logo" width="40" height="40" class="me-2">
     <h1 class="h5 mb-0">PLN LUBUK PAKAM</h1>
+
+    <div class="ms-auto">
+      <a href="{{ route('profile.show') }}" class="btn btn-light">
+        <img src="{{ asset('assets/icon/profile.svg') }}" alt="Profile" width="24" height="24">
+      </a>
+    </div>
   </div>
 
   <div id="sidebar" class="sidebar">
