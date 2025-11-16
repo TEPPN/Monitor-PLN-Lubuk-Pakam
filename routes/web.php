@@ -17,9 +17,7 @@ use App\Http\Controllers\Admin\UserController;
 */
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/', function () {
-        return view('pages.dashboard');
-    })->name('dashboard');
+    Route::get('/', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/map', [App\Http\Controllers\RecapController::class, 'map'])->name('map');
 
