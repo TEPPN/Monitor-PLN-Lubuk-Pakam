@@ -38,6 +38,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/contract', [App\Http\Controllers\ContractController::class, 'store'])->name('contract.store');
     Route::get('/log', [App\Http\Controllers\LogController::class, 'index'])->name('log.index');
     Route::get('/log/download', [App\Http\Controllers\LogController::class, 'download'])->name('log.download');
+
+    Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
 });
 
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
