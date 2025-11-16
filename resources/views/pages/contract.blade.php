@@ -41,7 +41,7 @@
                             <tr>
                                 <td>{{ $contract->name }}</td>
                                 <td>{{ $contract->company->name ?? 'N/A' }}</td>
-                                <td>{{ $contract->year }}</td>
+                                <td>{{ $contract->contract_date->format('F Y') }}</td>
                                 <td>{{ $contract->pole_size }}</td>
                                 <td>{{ $contract->stock }}</td>
                             </tr>

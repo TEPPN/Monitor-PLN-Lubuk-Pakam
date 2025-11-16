@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('name') -> unique();
             $table->foreignId('company_id')->constrained('companies');
-            $table->integer('year'); 
+            $table->date('contract_date');
             $table->enum('pole_size', ['9 meter', '12 meter']);
             $table->integer('stock');
             $table->timestamps();
