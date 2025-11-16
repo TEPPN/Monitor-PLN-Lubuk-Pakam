@@ -14,7 +14,39 @@ class LogController extends Controller
      */
     public function index()
     {
-        //
+        $logContent = $this->getFormattedLogs();
+        return view('pages.log', compact('logContent'));
+    }
+
+    public function download()
+    {
+        $logContent = $this->getFormattedLogs();
+
+        $fileName = 'activity_log_' . now()->format('Y-m-d_H-i-s') . '.log';
+
+        return response($logContent, 200, [
+            'Content-Type' => 'text/plain',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+        ]);
+    }
+
+    /**
+     * Fetches and formats all log entries.
+     *
+     * @return string
+     */
+    private function getFormattedLogs(): string
+    {
+        $logs = Log::with('user')->oldest()->get();
+        $logContent = "";
+
+        /** @var \App\Models\Log $log */
+        foreach ($logs as $log) {
+            $timestamp = $log->created_at->format('Y-m-d H:i:s');
+            $userName = $log->user->name ?? 'System';
+            $logContent .= "[{$timestamp}] User: {$userName} | Action: {$log->action_type} | Details: {$log->action_detail}\n";
+        }
+        return $logContent;
     }
 
     /**

@@ -15,6 +15,6 @@
     <a href="{{ route('recap.index') }}" class="nav-link text-dark">Rekap Permintaan Tiang</a>
   </li>
   <li class="nav-item">
-    <a href="{{ url('/log') }}" class="nav-link text-dark">Log</a>
+    <a href="{{ url('/log') }}" class="nav-link text-dark">Activity Log</a>
   </li>
 </ul>

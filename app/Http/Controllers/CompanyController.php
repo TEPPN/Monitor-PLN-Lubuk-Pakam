@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Log;
 use App\Models\Company;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -42,9 +43,15 @@ class CompanyController extends Controller
             'name' => ['required', 'string', 'max:255', Rule::unique('companies')],
         ]);
 
-        Company::create([
+        $company = Company::create([
             'name' => $validatedData['name'],
             'user_id' => Auth::id(),
+        ]);
+
+        Log::create([
+            'user_id' => Auth::id(),
+            'action_type' => 'create',
+            'action_detail' => "Created company: {$company->name} (ID: {$company->id})"
         ]);
 
         return redirect()->route('company.index')->with('success', 'Company added successfully!');
