@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+use App\Http\Controllers\Admin\LoginController as AdminLoginController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LoginController;
@@ -39,6 +42,19 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+
+});
+
+// Admin Routes
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AdminLoginController::class, 'login'])->name('login.post');
+    Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
+
+    Route::middleware(['auth:admin', 'master'])->group(function () {
+        Route::get('/', [AdminProfileController::class, 'show'])->name('profile');
+        Route::resource('users', AdminUserController::class)->except(['edit', 'update']);
+    });
 });
 
 Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');

@@ -17,4 +17,9 @@
   <li class="nav-item">
     <a href="{{ url('/log') }}" class="nav-link text-dark">Activity Log</a>
   </li>
+  @if(Auth::user() && Auth::user()->account_type == 'master')
+    <li class="nav-item">
+        <a href="{{ route('admin.users.index') }}" class="nav-link text-dark">User Management</a>
+    </li>
+  @endif
 </ul>
