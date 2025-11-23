@@ -14,7 +14,7 @@
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "false",
-        "APP_URL": "https://yourproductionurl.com",
+        "APP_URL": "monitor-tiang-pln-lubuk-pakam.vercel.app",
         "APP_KEY": "base64:HqTQNM+kEzRewvadxmsxxxrsyfD9dJBChfidiTf/iPI=",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
