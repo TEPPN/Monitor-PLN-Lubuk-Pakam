@@ -2,7 +2,7 @@
     "version": 2,
     "framework": null,
     "functions": {
-        "api/index.php": { "runtime": "vercel-php@0.7.2" }
+        "api/index.php": { "runtime": "vercel-php@0.7.4" }
     },
     "routes": [
         { "src": "/build/(.*)", "dest": "/public/build/" },
@@ -15,7 +15,7 @@
         "APP_ENV": "production",
         "APP_DEBUG": "false",
         "APP_URL": "https://yourproductionurl.com",
-        "APP_KEY": "base64:dY9ii3v1O7kSII9FtqyC/tJn3uTF+GWL7MIvMQ+t5Cc=",
+        "APP_KEY": "base64:HqTQNM+kEzRewvadxmsxxxrsyfD9dJBChfidiTf/iPI=",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
         "APP_PACKAGES_CACHE": "/tmp/packages.php",
@@ -26,6 +26,7 @@
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie",
         "DB_CONNECTION": "pgsql",
+        "DATABASE_URL":"postgresql://postgres:z1aau8y5n0dEsgGz@db.dxcuojaqnpikkxhljpyq.supabase.co:5432/postgres",
         "DB_HOST": "aws-1-ap-southeast-1.pooler.supabase.com",
         "DB_PORT": "6543",
         "DB_DATABASE": "postgres",
