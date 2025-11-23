@@ -26,7 +26,7 @@
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie",
         "DB_CONNECTION": "pgsql",
-        "DATABASE_URL"="postgresql://postgres:z1aau8y5n0dEsgGz@db.dxcuojaqnpikkxhljpyq.supabase.co:5432/postgres",
+        "DATABASE_URL":"postgresql://postgres:z1aau8y5n0dEsgGz@db.dxcuojaqnpikkxhljpyq.supabase.co:5432/postgres",
         "DB_HOST": "aws-1-ap-southeast-1.pooler.supabase.com",
         "DB_PORT": "6543",
         "DB_DATABASE": "postgres",
