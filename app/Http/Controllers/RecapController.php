@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Recap;
 use App\Models\Log;
 use App\Models\Contract;
+use App\Models\Company; 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -163,10 +164,47 @@ class RecapController extends Controller
         return redirect()->route('recap.index')->with('success', 'Recap deleted successfully!');
     }
 
-    public function map()
+    public function map(Request $request)
     {
-        // Fetch all recaps that have coordinates and their related contract
-        $recaps = Recap::with('contract')->whereNotNull('x_cord')->whereNotNull('y_cord')->get();
-        return view('pages.map', compact('recaps'));
+        // 1. Base Query
+        $query = Recap::with(['contract.company'])
+            ->whereNotNull('x_cord')
+            ->whereNotNull('y_cord');
+
+        // 2. Apply Filters
+        
+        // Filter by Company
+        if ($request->filled('company_id')) {
+            $query->whereHas('contract', function ($q) use ($request) {
+                $q->where('company_id', $request->company_id);
+            });
+        }
+
+        // Filter by Pole Size
+        if ($request->filled('pole_size')) {
+            $query->whereHas('contract', function ($q) use ($request) {
+                $q->where('pole_size', $request->pole_size);
+            });
+        }
+
+        // Filter by Year
+        if ($request->filled('year')) {
+            $query->whereHas('contract', function ($q) use ($request) {
+                $q->whereYear('contract_date', $request->year);
+            });
+        }
+
+        $recaps = $query->get();
+
+        // 3. Get Data for Filter Dropdowns
+        $companies = Company::orderBy('name')->get();
+        
+        // FIXED: Use EXTRACT(YEAR FROM ...) for PostgreSQL compatibility
+        $years = Contract::selectRaw('EXTRACT(YEAR FROM contract_date) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        return view('pages.map', compact('recaps', 'companies', 'years'));
     }
 }

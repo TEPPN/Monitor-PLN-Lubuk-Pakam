@@ -1,31 +1,7 @@
 @extends('components.appbar')
 
 @section('title', 'Dashboard')
-
 @section('content')
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - PLN Monitoring</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .table-bordered th, .table-bordered td {
-            border: 1px solid #dee2e6;
-        }
-        .table-bordered thead th {
-            border-bottom-width: 2px;
-        }
-        .text-center {
-            text-align: center;
-        }
-        .align-middle {
-            vertical-align: middle;
-        }
-    </style>
-</head>
-<body>
     <div class="container-fluid mt-5">
         <h1 class="mb-4">Dashboard Kontrak</h1>
 
@@ -91,7 +67,4 @@
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
 @endsection
