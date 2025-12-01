@@ -44,6 +44,27 @@ require __DIR__.'/../vendor/autoload.php';
 |
 */
 
+if (isset($_SERVER['VERCEL_ENV'])) {
+    // Force Laravel to use the Vercel-writable /tmp directory for storage
+    $app_base_path = dirname(__DIR__);
+    $_SERVER['LARAVEL_STORAGE_PATH'] = '/tmp/storage';
+    
+    // Create the necessary storage directories if they don't exist
+    $storagePath = $_SERVER['LARAVEL_STORAGE_PATH'];
+    if (!is_dir("{$storagePath}/framework/cache")) {
+        mkdir("{$storagePath}/framework/cache", 0755, true);
+    }
+    if (!is_dir("{$storagePath}/framework/sessions")) {
+        mkdir("{$storagePath}/framework/sessions", 0755, true);
+    }
+    if (!is_dir("{$storagePath}/framework/views")) {
+        mkdir("{$storagePath}/framework/views", 0755, true);
+    }
+    if (!is_dir("{$storagePath}/logs")) {
+        mkdir("{$storagePath}/logs", 0755, true);
+    }
+}
+
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
 $kernel = $app->make(Kernel::class);
