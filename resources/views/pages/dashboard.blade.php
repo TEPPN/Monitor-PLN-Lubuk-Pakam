@@ -18,6 +18,8 @@
                                 <th colspan="2">Planted</th>
                                 <th colspan="2">Leftover</th>
                                 <th rowspan="2">Detail</th>
+                                <th rowspan="2">Masa Kontrak</th>
+                                <th rowspan="2">Aksi</th>
                             </tr>
                             <tr>
                                 <th>9m</th>
@@ -35,7 +37,11 @@
                                 @php
                                     $leftover_9m = $data['stock_9m'] - $data['planted_9m'];
                                     $leftover_12m = $data['stock_12m'] - $data['planted_12m'];
-                                    $isDone = ($data['stock_9m'] > 0 && $data['stock_9m'] == $data['planted_9m']) || ($data['stock_12m'] > 0 && $data['stock_12m'] == $data['planted_12m']);
+                                    
+                                    // Status Done jika Stock sama dengan Planted untuk KEDUA tipe (atau stock 0)
+                                    $done9m = $data['stock_9m'] == $data['planted_9m'];
+                                    $done12m = $data['stock_12m'] == $data['planted_12m'];
+                                    $isDone = $done9m && $done12m;
                                 @endphp
                                 <tr class="text-center">
                                     <td>{{ $loop->iteration }}</td>
@@ -54,6 +60,17 @@
                                         @else
                                             <span class="badge bg-warning text-dark">In Progress</span>
                                         @endif
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge {{ $data['remaining_days_val'] < 0 ? 'bg-danger' : 'bg-success' }}">
+                                            {{ $data['remaining_days_text'] }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('recap.index', ['contract_id' => $data['contract_id']]) }}" 
+                                        class="btn btn-sm btn-primary">
+                                            Lihat Rekap
+                                        </a>
                                     </td>
                                 </tr>
                             @empty

@@ -187,6 +187,18 @@
             </div>
 
             <div class="filter-group">
+                <select name="contract_id" class="form-select shadow-sm" onchange="this.form.submit()">
+                    <option value="">-- Semua Kontrak --</option>
+                    @foreach($contracts as $contract)
+                        <option value="{{ $contract->id }}" {{ request('contract_id') == $contract->id ? 'selected' : '' }}>
+                            {{-- Tampilkan nama kontrak (bisa dipotong jika terlalu panjang) --}}
+                            {{ Str::limit($contract->name, 20) }} 
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="filter-group">
                 <select name="pole_size" class="form-select shadow-sm" onchange="this.form.submit()">
                     <option value="">-- Semua Ukuran --</option>
                     <option value="9 meter" {{ request('pole_size') == '9 meter' ? 'selected' : '' }}>9 Meter</option>
@@ -225,13 +237,11 @@
         <div class="legend-item">
             <span class="dot" style="background-color: #9c27b0;"></span> Tiang 12 meter
         </div>
-        <div class="legend-item">
-            <span class="dot" style="background-color: #2ca0fa;"></span> Default/Lainnya
-        </div>
     </div>
 
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script>
+        // --- 1. SETUP MAP ---
         const toggleBtn = document.getElementById('toggleFilterBtn');
         const filterContainer = document.getElementById('filterContainer');
 
@@ -248,59 +258,88 @@
             initialCoords = [recaps[0].x_cord, recaps[0].y_cord];
         }
 
-        const map = L.map('map').setView(initialCoords, 12);
+        const map = L.map('map').setView(initialCoords, 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        const createIcon = (colorUrl) => new L.Icon({
-            iconUrl: colorUrl,
+
+        const greenIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
         });
 
-        const greenIcon = createIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png');
-        const purpleIcon = createIcon('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png');
-        const defaultIcon = createIcon('https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png');
+        const purpleIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        });
 
-        const markers = []; 
+        const markers = [];
 
+        // --- 3. LOGIKA RENDER MARKER DENGAN OFFSET ---
         recaps.forEach(recap => {
+            // Pastikan koordinat valid (bukan null) dan dikonversi ke float
             if (recap.x_cord && recap.y_cord) {
-                const coordinates = [recap.x_cord, recap.y_cord];
+                // Konversi string DB ke angka agar bisa dihitung
+                const lat = parseFloat(recap.x_cord);
+                const lng = parseFloat(recap.y_cord);
                 
-                let icon = defaultIcon;
-                if (recap.contract && recap.contract.pole_size === '9 meter') {
-                    icon = greenIcon;
-                } else if (recap.contract && recap.contract.pole_size === '12 meter') {
-                    icon = purpleIcon;
-                }
+                const has9m = recap.planted_9m > 0;
+                const has12m = recap.planted_12m > 0;
 
-                // --- PEMBARUAN DI SINI ---
-                const popupContent = `
-                    <div style="font-family: sans-serif;">
-                        <strong>${recap.job}</strong><br>
-                        <hr style="margin: 5px 0;">
-                        <small>📍 ${recap.address}</small><br>
-                        <small>📄 Jenis Kontrak: ${recap.contract?.name || recap.contract || '-'}</small><br>
-                        <small>🏢 ${recap.contract?.company?.name || 'Unknown PT'}</small><br>
-                        <small>📏 ${recap.contract?.pole_size || '-'}</small><br>
-                        <small>📅 ${recap.created_at ? new Date(recap.created_at).getFullYear() : '-'}</small>
-                    </div>
+                const basePopup = `
+                    <b>Pekerjaan:</b> ${recap.job}<br>
+                    <b>Alamat:</b> ${recap.address}<br>
+                    <hr style="margin: 5px 0;">
                 `;
 
-                const marker = L.marker(coordinates, { icon: icon })
-                    .addTo(map)
-                    .bindPopup(popupContent);
+                // LOGIKA OFFSET:
+                // Jika lokasi ini punya DUA tipe tiang (9m DAN 12m), kita geser sedikit posisinya
+                // agar tidak saling menimpa.
                 
-                markers.push(marker);
+                let lat9m = lat, lng9m = lng;
+                let lat12m = lat, lng12m = lng;
+
+                if (has9m && has12m) {
+                    // Geser 9m sedikit ke KIRI (0.00005 derajat ~ 5 meter)
+                    lng9m = lng - 0.00005;
+                    // Geser 12m sedikit ke KANAN
+                    lng12m = lng + 0.00005;
+                }
+
+                // --- Render Marker 9 Meter ---
+                if (has9m) {
+                    const popup9m = basePopup + `<b>Tipe:</b> Tiang 9 Meter<br><b>Jumlah:</b> ${recap.planted_9m}`;
+                    const m9 = L.marker([lat9m, lng9m], { icon: greenIcon })
+                        .addTo(map)
+                        .bindPopup(popup9m);
+                    markers.push(m9);
+                }
+
+                // --- Render Marker 12 Meter ---
+                if (has12m) {
+                    const popup12m = basePopup + `<b>Tipe:</b> Tiang 12 Meter<br><b>Jumlah:</b> ${recap.planted_12m}`;
+                    const m12 = L.marker([lat12m, lng12m], { icon: purpleIcon })
+                        .addTo(map)
+                        .bindPopup(popup12m);
+                    markers.push(m12);
+                }
+
+                // --- Fallback (Jika data ada koordinat tapi stok 0 / data lama) ---
+                if (!has9m && !has12m) {
+                     const popupDef = basePopup + `<i>Belum ada tiang tertanam</i>`;
+                     const mDef = L.marker([lat, lng], { icon: defaultIcon })
+                        .addTo(map)
+                        .bindPopup(popupDef);
+                     markers.push(mDef);
+                }
             }
         });
 
+        // Auto zoom ke area marker
         if (markers.length > 0) {
             const group = new L.featureGroup(markers);
             map.fitBounds(group.getBounds().pad(0.1));

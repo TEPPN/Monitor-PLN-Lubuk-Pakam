@@ -1,70 +1,101 @@
 @extends('components.appbar')
 
-@section('title', 'Rekap Permintaan')
 @section('content')
-    <div class="container mt-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Rekap Permintaan Tiang</h1>
-            <a href="{{ route('recap.create') }}" class="btn btn-primary">Add Recap</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Rekap</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>Daftar Rekap Pekerjaan</h1>
+            <a href="{{ route('recap.create') }}" class="btn btn-primary">Add New Recap</a>
         </div>
 
+        {{-- Filter Section --}}
         <div class="card mb-4">
             <div class="card-body">
-                <form action="{{ route('recap.index') }}" method="GET">
-                    <div class="row align-items-end">
-                        <div class="col-md-4">
-                            <label for="contract_id" class="form-label">Filter by Contract</label>
-                            <select name="contract_id" id="contract_id" class="form-select" onchange="this.form.submit()">
-                                <option value="">All Contracts</option>
-                                @foreach ($contracts as $contract)
-                                    <option value="{{ $contract->id }}" {{ request('contract_id') == $contract->id ? 'selected' : '' }}>{{ $contract->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                <form action="{{ route('recap.index') }}" method="GET" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="contract_id" class="form-label">Filter by Contract</label>
+                        <select class="form-select" name="contract_id" onchange="this.form.submit()">
+                            <option value="">-- All Contracts --</option>
+                            @foreach ($contracts as $contract)
+                                <option value="{{ $contract->id }}" {{ request('contract_id') == $contract->id ? 'selected' : '' }}>
+                                    {{ $contract->name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
+                    
+                    @if($selectedContract)
+                        <div class="col-md-8">
+                            <div class="alert alert-info mb-0">
+                                <strong>Contract Info:</strong> {{ $selectedContract->name }} <br>
+                                {{-- Menampilkan Sisa Stok untuk kedua tipe --}}
+                                Sisa Stok 9m: <strong>{{ $remainingStock['9m'] }}</strong> / {{ $selectedContract->stock_9m }} | 
+                                Sisa Stok 12m: <strong>{{ $remainingStock['12m'] }}</strong> / {{ $selectedContract->stock_12m }}
+                            </div>
+                        </div>
+                    @endif
                 </form>
             </div>
         </div>
 
-        @if (session('success'))
-            <div class="alert alert-success mb-3">
-                {{ session('success') }}
-            </div>
-        @endif
-
+        {{-- Table Section --}}
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
+                    <table class="table table-bordered table-striped">
+                        <thead class="text-center align-middle">
                             <tr>
-                                <th scope="col">Pekerjaan</th>
-                                <th scope="col">Kontrak</th>
-                                <th scope="col">Pelaksana</th>
-                                <th scope="col">Alamat</th>
-                                <th scope="col">Request</th>
-                                <th scope="col">Tertanam</th>
-                                <th scope="col">Dibuat Oleh</th>
-                                <th scope="col">Actions</th>
+                                <th rowspan="2">#</th>
+                                <th rowspan="2">Pekerjaan</th>
+                                <th rowspan="2">Alamat</th>
+                                <th colspan="2">Request</th>
+                                <th colspan="2">Planted</th>
+                                <th rowspan="2">Executor</th>
+                                <th rowspan="2">Action</th>
+                            </tr>
+                            <tr>
+                                <th>9m</th>
+                                <th>12m</th>
+                                <th>9m</th>
+                                <th>12m</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($recaps as $recap)
                                 <tr>
+                                    <td class="text-center">{{ $recaps->firstItem() + $loop->index }}</td>
                                     <td>{{ $recap->job }}</td>
-                                    <td>{{ $recap->contract->name ?? $recap->contract ?? 'N/A' }}</td>
-                                    <td>{{ $recap->executor }}</td>
                                     <td>{{ $recap->address }}</td>
-                                    <td>{{ $recap->request }}</td>
-                                    <td>{{ $recap->planted }}</td>
-                                    <td>{{ $recap->createdBy->name ?? 'N/A' }}</td>
-                                    <td>
+                                    
+                                    {{-- Kolom Request --}}
+                                    <td class="text-center">{{ $recap->request_9m > 0 ? $recap->request_9m : '-' }}</td>
+                                    <td class="text-center">{{ $recap->request_12m > 0 ? $recap->request_12m : '-' }}</td>
+                                    
+                                    {{-- Kolom Planted --}}
+                                    <td class="text-center">{{ $recap->planted_9m > 0 ? $recap->planted_9m : '-' }}</td>
+                                    <td class="text-center">{{ $recap->planted_12m > 0 ? $recap->planted_12m : '-' }}</td>
+
+                                    <td>{{ $recap->executor }}</td>
+                                    <td class="text-center">
                                         <a href="{{ route('recap.edit', $recap->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                        <form action="{{ route('recap.destroy', $recap->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger">Del</button>
+                                        </form>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center">No recaps found.</td>
+                                    <td colspan="9" class="text-center">No recap data found.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -72,18 +103,11 @@
                 </div>
             </div>
             <div class="card-footer">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        {{ $recaps->links() }}
-                    </div>
-                    @if (isset($selectedContract))
-                        <div class="text-start">
-                            <h6 class="mb-0">Stock for: {{ $selectedContract->name }}</h6>
-                            <small>Initial: {{ number_format($selectedContract->stock) }} | Remaining: <span class="fw-bold">{{ number_format($remainingStock) }}</span></small>
-                        </div>
-                    @endif
-                </div>
+                {{ $recaps->links() }}
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
 @endsection
