@@ -37,12 +37,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/contract', [App\Http\Controllers\ContractController::class, 'index'])->name('contract.index');
     Route::get('/contract/create', [App\Http\Controllers\ContractController::class, 'create'])->name('contract.create');
     Route::post('/contract', [App\Http\Controllers\ContractController::class, 'store'])->name('contract.store');
+    Route::get('/contract/{contract}/edit', [App\Http\Controllers\ContractController::class, 'edit'])->name('contract.edit');
+    Route::put('/contract/{contract}', [App\Http\Controllers\ContractController::class, 'update'])->name('contract.update');
+    Route::delete('/contract/{contract}', [App\Http\Controllers\ContractController::class, 'destroy'])->name('contract.destroy');
+    
     Route::get('/log', [App\Http\Controllers\LogController::class, 'index'])->name('log.index');
     Route::get('/log/download', [App\Http\Controllers\LogController::class, 'download'])->name('log.download');
 
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
-
+    
 });
 
 // Admin Routes

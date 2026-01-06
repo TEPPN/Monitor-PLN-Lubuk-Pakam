@@ -5,16 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Recap;
 use App\Models\Log;
 use App\Models\Contract;
+use App\Models\Company; // <--- PENTING: Tambahkan ini agar tidak error Class not found
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class RecapController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index(Request $request)
     {
         $contracts = Contract::orderBy('name')->get();
@@ -22,19 +18,20 @@ class RecapController extends Controller
         $recapsQuery = Recap::with(['contract.company', 'createdBy'])->latest();
 
         $selectedContract = null;
-        $remainingStock = null;
+        $remainingStock = ['9m' => 0, '12m' => 0];
 
         if ($request->filled('contract_id')) {
             $contractId = $request->contract_id;
             $recapsQuery->where('contract_id', $contractId);
 
-            // Fetch the selected contract to get its initial stock
             $selectedContract = Contract::find($contractId);
 
             if ($selectedContract) {
-                // Sum all 'request' values for this contract from the recaps table
-                $totalRequested = Recap::where('contract_id', $contractId)->sum('request');
-                $remainingStock = $selectedContract->stock - $totalRequested;
+                $totalRequested9m = Recap::where('contract_id', $contractId)->sum('request_9m');
+                $remainingStock['9m'] = $selectedContract->stock_9m - $totalRequested9m;
+
+                $totalRequested12m = Recap::where('contract_id', $contractId)->sum('request_12m');
+                $remainingStock['12m'] = $selectedContract->stock_12m - $totalRequested12m;
             }
         }
 
@@ -42,31 +39,22 @@ class RecapController extends Controller
         return view('pages.recap-list', compact('recaps', 'contracts', 'selectedContract', 'remainingStock'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         $contracts = Contract::orderBy('name')->get();
         return view('pages.recap-create', compact('contracts'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $validatedData = $request->validate([
             'contract_id' => 'nullable|exists:contracts,id',
             'job' => 'required|string',
             'address' => 'required|string|max:255',
-            'request' => 'required|integer|min:0',
-            'planted' => 'required|integer|min:0',
+            'request_9m' => 'required|integer|min:0',
+            'request_12m' => 'required|integer|min:0',
+            'planted_9m' => 'required|integer|min:0',
+            'planted_12m' => 'required|integer|min:0',
             'x_cord' => 'required|numeric',
             'y_cord' => 'required|numeric',
             'contract' => 'nullable|string|max:255',
@@ -86,45 +74,22 @@ class RecapController extends Controller
         return redirect()->route('recap.index')->with('success', 'Recap created successfully!');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Recap  $recap
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Recap $recap)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Recap  $recap
-     * @return \Illuminate\Http\Response
-     */
     public function edit(Recap $recap)
     {
         $contracts = Contract::orderBy('name')->get();
-        // The $recap is automatically fetched by Laravel's route model binding
         return view('pages.recap-edit', compact('recap', 'contracts'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Recap  $recap
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, Recap $recap)
     {
         $validatedData = $request->validate([
             'contract_id' => 'nullable|exists:contracts,id',
             'job' => 'required|string',
             'address' => 'required|string|max:255',
-            'request' => 'required|integer|min:0',
-            'planted' => 'required|integer|min:0',
+            'request_9m' => 'required|integer|min:0',
+            'request_12m' => 'required|integer|min:0',
+            'planted_9m' => 'required|integer|min:0',
+            'planted_12m' => 'required|integer|min:0',
             'x_cord' => 'required|numeric',
             'y_cord' => 'required|numeric',
             'contract' => 'nullable|string|max:255',
@@ -142,12 +107,6 @@ class RecapController extends Controller
         return redirect()->route('recap.index')->with('success', 'Recap updated successfully!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Recap  $recap
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Recap $recap)
     {
         $recapJob = $recap->job;
@@ -163,10 +122,54 @@ class RecapController extends Controller
         return redirect()->route('recap.index')->with('success', 'Recap deleted successfully!');
     }
 
-    public function map()
+    // --- FUNGSI MAP YANG SUDAH DIPERBAIKI ---
+    public function map(Request $request)
     {
-        // Fetch all recaps that have coordinates and their related contract
-        $recaps = Recap::with('contract')->whereNotNull('x_cord')->whereNotNull('y_cord')->get();
-        return view('pages.map', compact('recaps'));
+        // 1. Query Dasar: Ambil recap yang punya koordinat
+        $query = Recap::with(['contract.company'])
+            ->whereNotNull('x_cord')
+            ->whereNotNull('y_cord');
+
+        // 2. Filter: Company (Perusahaan)
+        if ($request->filled('company_id')) {
+            $query->whereHas('contract', function ($q) use ($request) {
+                $q->where('company_id', $request->company_id);
+            });
+        }
+
+        // 3. Filter: Tahun
+        if ($request->filled('year')) {
+            $query->whereYear('created_at', $request->year);
+        }
+
+        // 4. Filter: Ukuran Tiang (Logic baru berdasarkan kolom planted)
+        if ($request->filled('pole_size')) {
+            if ($request->pole_size == '9 meter') {
+                $query->where('planted_9m', '>', 0);
+            } elseif ($request->pole_size == '12 meter') {
+                $query->where('planted_12m', '>', 0);
+            }
+        }
+        if ($request->filled('contract_id')) {
+            $query->where('contract_id', $request->contract_id);
+        }
+        
+
+        // Eksekusi Query
+        $recaps = $query->get();
+
+        // 5. Data Pendukung untuk Dropdown Filter
+        $companies = Company::orderBy('name')->get();
+
+        $contracts = Contract::orderBy('name')->get();
+        
+        // Ambil list tahun unik dari data Recap yang ada
+        $years = Recap::selectRaw('EXTRACT(YEAR FROM created_at) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
+
+        // Kirim semua variabel ke View (INI YANG SEBELUMNYA KURANG)
+        return view('pages.map', compact('recaps', 'companies', 'years', 'contracts'));
     }
 }

@@ -5,7 +5,12 @@
         "api/index.php": { "runtime": "vercel-php@0.7.4" }
     },
     "routes": [
-        { "src": "/build/(.*)", "dest": "/public/build/" },
+        { "src": "/build/(.*)", "dest": "/build/$1" },
+        { "src": "/assets/icon/(.*)", "dest": "/assets/$1" },
+        { "src": "/assets/fonts/(.*)", "dest": "/assets/$1" },
+        { "src": "/css/(.*)", "dest": "/css/$1" },
+        { "src": "/js/(.*)", "dest": "/js/$1" },
+        { "src": "/storage/(.*)", "dest": "/storage/$1" },
         { "src": "/(.*)", "dest": "/api/index.php" }
     ],
     "public": true,
@@ -14,7 +19,7 @@
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "false",
-        "APP_URL": "https://yourproductionurl.com",
+        "APP_URL": "monitor-tiang-pln-lubuk-pakam.vercel.app",
         "APP_KEY": "base64:HqTQNM+kEzRewvadxmsxxxrsyfD9dJBChfidiTf/iPI=",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
@@ -26,10 +31,6 @@
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie",
         "DB_CONNECTION": "pgsql",
-        "DATABASE_URL":"postgresql://postgres:z1aau8y5n0dEsgGz@db.dxcuojaqnpikkxhljpyq.supabase.co:5432/postgres",
-        "DB_HOST": "aws-1-ap-southeast-1.pooler.supabase.com",
-        "DB_PORT": "6543",
-        "DB_DATABASE": "postgres",
-        "DB_USERNAME": "postgres.dxcuojaqnpikkxhljpyq"
+        "DATABASE_URL":"postgresql://postgres.dxcuojaqnpikkxhljpyq:z1aau8y5n0dEsgGz@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres"
     }
 }
