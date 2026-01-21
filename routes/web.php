@@ -47,6 +47,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     
+    Route::get('/dashboard/export', [App\Http\Controllers\DashboardController::class, 'export'])->name('dashboard.export');
+
+    Route::get('/recaps/export', [App\Http\Controllers\RecapController::class, 'export'])->name('recap.export');
 });
 
 // Admin Routes
