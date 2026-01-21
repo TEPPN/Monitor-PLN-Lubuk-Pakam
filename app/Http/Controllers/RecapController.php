@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Recap;
 use App\Models\Log;
+use App\Models\Recap;
 use App\Models\Contract;
-use App\Models\Company; // <--- PENTING: Tambahkan ini agar tidak error Class not found
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Models\Company; // <--- PENTING: Tambahkan ini agar tidak error Class not found
 
 class RecapController extends Controller
 {
@@ -171,5 +172,54 @@ class RecapController extends Controller
 
         // Kirim semua variabel ke View (INI YANG SEBELUMNYA KURANG)
         return view('pages.map', compact('recaps', 'companies', 'years', 'contracts'));
+    }
+    public function export(Request $request)
+    {
+        $filename = 'recap-data-' . date('Y-m-d-His') . '.csv';
+
+        $response = new StreamedResponse(function () use ($request) {
+            $handle = fopen('php://output', 'w');
+
+            // 1. Header CSV
+            fputcsv($handle, [
+                'No', 'Kontrak', 'Pelaksana', 'Pekerjaan', 'Alamat',
+                'Req 9m', 'Tanam 9m', 'Req 12m', 'Tanam 12m', 
+                'Koordinat X', 'Koordinat Y', 'Tanggal Input'
+            ]);
+
+            // 2. Query Data (Copy logic filter dari index)
+            $query = Recap::with('contract');
+
+            if ($request->filled('contract_id')) {
+                $query->where('contract_id', $request->contract_id);
+            }
+
+            // Gunakan chunk untuk hemat memori jika data ribuan
+            $query->latest()->chunk(500, function ($recaps) use ($handle) {
+                foreach ($recaps as $index => $recap) {
+                    fputcsv($handle, [
+                        $recap->id, // Atau nomor urut jika mau hitung manual
+                        $recap->contract->name ?? $recap->contract, // Nama kontrak relasi atau text manual
+                        $recap->executor,
+                        $recap->job,
+                        $recap->address,
+                        $recap->request_9m,
+                        $recap->planted_9m,
+                        $recap->request_12m,
+                        $recap->planted_12m,
+                        $recap->x_cord,
+                        $recap->y_cord,
+                        $recap->created_at->format('Y-m-d H:i')
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        });
+
+        $response->headers->set('Content-Type', 'text/csv');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
+        return $response;
     }
 }

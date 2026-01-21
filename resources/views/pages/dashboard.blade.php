@@ -4,6 +4,17 @@
 @section('content')
     <div class="container-fluid mt-5">
         <h1 class="mb-4">Dashboard Kontrak</h1>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">Dashboard Monitoring</h2>
+            <a href="{{ route('dashboard.export') }}" class="btn btn-success">
+                {{-- Icon Download (Optional) --}}
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-spreadsheet" viewBox="0 0 16 16">
+                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+                <path d="M3 12h10v1H3v-1zm0-2h10v1H3v-1zm0-2h10v1H3V8zm0-2h10v1H3V6zm0-2h10v1H3V4z"/>
+                </svg>
+                Export CSV
+            </a>
+        </div>
 
         <div class="card">
             <div class="card-body">
